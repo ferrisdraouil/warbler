@@ -3,6 +3,7 @@
   <div class="col-sm-9">
     <div class="row">
 
+      <!-- who user follows... user.following is the list of who the user follows -->
       {% for followee in user.following %}
 
         <div class="col-lg-4 col-md-6 col-12">
@@ -28,7 +29,7 @@
                 {% endif %}
 
               </div>
-              <p class="card-bio">{{ user.bio }}</p>
+              <p class="card-bio">{{ followee.bio }}</p>
             </div>
           </div>
         </div>

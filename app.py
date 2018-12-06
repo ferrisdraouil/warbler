@@ -144,10 +144,9 @@ def users_show(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    # snagging messages in order from the database;
-    # user.messages won't be in order by default
-    messages = (Message.query.filter(Message.user_id == user_id).order_by(
-        Message.timestamp.desc()).limit(100).all())
+    messages = Message.query.filter(Message.user_id == user_id).order_by(
+        Message.timestamp.desc()).limit(100).all()
+    # query all messages that followees have posted
     return render_template('users/show.html', user=user, messages=messages)
 
 
@@ -318,8 +317,17 @@ def homepage():
     """
 
     if g.user:
+        # collect all ids in a SET of those user is following PLUS user id
+        all_ids = {leader.id for leader in g.user.following}.union({g.user.id})
+        # filters all messages by all_ids            
         messages = (Message.query.order_by(
-            Message.timestamp.desc()).limit(100).all())
+            Message.timestamp.desc()).filter(Message.user_id.in_(all_ids).limit(100).all())
+
+        # user_followees = user.following
+
+        # snagging messages in order from the database;
+        # user.messages won't be in order by default
+        # query all messages that THE CURR USER has posted
 
         return render_template('home.html', messages=messages)
 

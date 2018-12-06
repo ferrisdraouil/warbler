@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, EditProfileForm
 from models import db, connect_db, User, Message
 
 CURR_USER_KEY = "curr_user"
@@ -205,11 +205,38 @@ def stop_following(follow_id):
     return redirect(f"/users/{g.user.id}/following")
 
 
-@app.route('/users/profile', methods=["GET", "POST"])
-def profile():
+@app.route('/users/<int:user_id>/profile', methods=["GET", "POST"])
+def profile(user_id):
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    # user = User.query.get_or_404(user_id)  # don't need to re-query
+    form = EditProfileForm(obj=g.user)
+
+    # POST
+    if form.validate_on_submit():
+        # check user password before continuing
+        user = User.authenticate(g.user.username, form.password.data)
+
+        if user:
+            # process data and add to DB
+            g.user.username = form.data.get('username')
+            g.user.email = form.data.get('email')
+            g.user.image_url = form.data.get('image_url')
+            g.user.bio = form.data.get('bio')
+            db.session.add(g.user)
+            db.session.commit()
+            return redirect(f'/users/{g.user.id}')
+        elif not form.validate_on_submit():
+            # didn't work
+            form.username.errors = [""]  #
+            return render_template('users/edit.html', form=form, user=g.user)
+
+    # GET
+    return render_template('users/edit.html', form=form, user=g.user)
 
 
 @app.route('/users/delete', methods=["POST"])

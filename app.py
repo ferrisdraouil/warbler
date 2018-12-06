@@ -319,9 +319,9 @@ def homepage():
     if g.user:
         # collect all ids in a SET of those user is following PLUS user id
         all_ids = {leader.id for leader in g.user.following}.union({g.user.id})
-        # filters all messages by all_ids            
-        messages = (Message.query.order_by(
-            Message.timestamp.desc()).filter(Message.user_id.in_(all_ids).limit(100).all())
+        # filters all messages by all_ids
+        messages = Message.query.order_by(Message.timestamp.desc()).filter(
+            Message.user_id.in_(all_ids)).limit(100).all()
 
         # user_followees = user.following
 

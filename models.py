@@ -55,17 +55,11 @@ class User(db.Model):
     )
 
     header_image_url = db.Column(
-        db.Text,
-        default="/static/images/warbler-hero.jpg"
-    )
+        db.Text, default="/static/images/warbler-hero.jpg")
 
-    bio = db.Column(
-        db.Text,
-    )
+    bio = db.Column(db.Text, )
 
-    location = db.Column(
-        db.Text,
-    )
+    location = db.Column(db.Text, )
 
     password = db.Column(
         db.Text,
@@ -87,13 +81,17 @@ class User(db.Model):
     def is_followed_by(self, other_user):
         """Is this user followed by `other_user`?"""
 
-        found_user_list = [user for user in self.followers if user == other_user]
+        found_user_list = [
+            user for user in self.followers if user == other_user
+        ]
         return len(found_user_list) == 1
 
     def is_following(self, other_user):
         """Is this user following `other_use`?"""
 
-        found_user_list = [user for user in self.following if user == other_user]
+        found_user_list = [
+            user for user in self.following if user == other_user
+        ]
         return len(found_user_list) == 1
 
     @classmethod

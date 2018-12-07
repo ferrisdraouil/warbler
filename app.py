@@ -346,12 +346,13 @@ def remove_like(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    likes = g.user.likes
-
-    for like in likes:
-        if like.message_id == message_id:
-            db.session.delete(like)
-            db.session.commit()
+    # likes = g.user.likes
+    found_like = Like.query.filter(Like.message_id == message_id,
+                                   Like.liker_id == g.user.id).first()
+    # select from the likes table where message_id = message.id AND user_id = user.id
+    db.session.delete(found_like)
+    # g.user.likes.remove(found_like)
+    db.session.commit()
 
     userpage_id = Message.query.get_or_404(message_id).user.id
 

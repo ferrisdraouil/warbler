@@ -118,6 +118,7 @@ class User(db.Model):
         found_user_list = [
             user for user in self.following if user == other_user
         ]
+
         return len(found_user_list) == 1
 
     @classmethod

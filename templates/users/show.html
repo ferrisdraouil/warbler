@@ -18,6 +18,9 @@
             <p>{{ message.text }}</p>
           </div>
         </li>
+        <form action="/{{ message.id }}/like" class="form-inline" method="post">
+          <button class="btn btn-primary my-1" type="submit">Like</button> 
+        </form>
 
       {% endfor %}
 

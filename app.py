@@ -5,8 +5,9 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, EditProfileForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Like
 
+# 'curr_user' is the key in session that we are looking for to see if user is logged in/ has access
 CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
@@ -23,7 +24,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
-
+db.create_all()
 ##############################################################################
 # User signup/login/logout
 
@@ -32,6 +33,7 @@ connect_db(app)
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
+    # same as 'curr_user' in session
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
 
@@ -302,6 +304,36 @@ def messages_destroy(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
+
+
+##############################################################################
+# Likes
+
+
+@app.route('/<int:message_id>/like', methods=['POST'])
+def add_like(message_id):
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    like = Like(liker_id=g.user.id, message_id=message_id)
+    db.session.add(like)
+    db.session.commit()
+
+    return redirect(f'/users/{g.user.id}')
+
+
+@app.route('/users/<int:user_id>/likes')
+def show_user_likes(user_id):
+
+    # messages_ids = {message_id for message in g.user.likes}
+
+    user = User.query.get_or_404(user_id)
+    message_ids = [like.message_id for like in user.likes]
+    messages = Message.query.filter(Message.id.in_(message_ids)).all()
+
+    return render_template('home.html', messages=messages)
 
 
 ##############################################################################

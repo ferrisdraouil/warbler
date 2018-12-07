@@ -27,6 +27,32 @@ class FollowersFollowee(db.Model):
     )
 
 
+class Like(db.Model):
+    """Connection of a follower <-> followee."""
+
+    __tablename__ = 'likes'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # user id of who liked a post
+    liker_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete="cascade"),
+        primary_key=True,
+    )
+
+    # user id of who created the post
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id', ondelete="cascade"),
+        primary_key=True,
+    )
+
+    message = db.relationship('Message', backref='likes')
+
+    user = db.relationship('User', backref='likes')
+
+
 class User(db.Model):
     """User in the system."""
 

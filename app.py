@@ -145,11 +145,16 @@ def users_show(user_id):
     """Show user profile."""
 
     user = User.query.get_or_404(user_id)
+    liked_messages = {like.message_id for like in g.user.likes}
 
     messages = Message.query.filter(Message.user_id == user_id).order_by(
         Message.timestamp.desc()).limit(100).all()
     # query all messages that followees have posted
-    return render_template('users/show.html', user=user, messages=messages)
+    return render_template(
+        'users/show.html',
+        user=user,
+        messages=messages,
+        liked_messages=liked_messages)
 
 
 @app.route('/users/<int:user_id>/following')
@@ -288,7 +293,10 @@ def messages_show(message_id):
     """Show a message."""
 
     msg = Message.query.get(message_id)
-    return render_template('messages/show.html', message=msg)
+    # create a set of liked messages
+    liked_messages = {like.message_id for like in g.user.likes}
+    return render_template(
+        'messages/show.html', message=msg, liked_messages=liked_messages)
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
@@ -310,18 +318,44 @@ def messages_destroy(message_id):
 # Likes
 
 
-@app.route('/<int:message_id>/like', methods=['POST'])
+@app.route('/<int:message_id>/add_like', methods=['POST'])
 def add_like(message_id):
+    """Adds like if message not in user.likes"""
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    like = Like(liker_id=g.user.id, message_id=message_id)
-    db.session.add(like)
-    db.session.commit()
+    if not Message.query.get_or_404(message_id).user == g.user:
 
-    return redirect(f'/users/{g.user.id}')
+        new_like = Like(liker_id=g.user.id, message_id=message_id)
+
+        db.session.add(new_like)
+        db.session.commit()
+
+    userpage_id = Message.query.get_or_404(message_id).user.id
+
+    return redirect(f'/users/{userpage_id}')
+
+
+@app.route('/<int:message_id>/remove_like', methods=['POST'])
+def remove_like(message_id):
+    """Removes a like if the like already exists"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    likes = g.user.likes
+
+    for like in likes:
+        if like.message_id == message_id:
+            db.session.delete(like)
+            db.session.commit()
+
+    userpage_id = Message.query.get_or_404(message_id).user.id
+
+    return redirect(f'/users/{userpage_id}')
 
 
 @app.route('/users/<int:user_id>/likes')

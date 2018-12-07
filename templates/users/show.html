@@ -1,29 +1,49 @@
-{% extends 'users/detail.html' %}
-{% block user_details %}
-  <div class="col-sm-6">
-    <ul class="list-group" id="messages">
+{% extends 'users/detail.html' %} {% block user_details %}
+<div class="col-sm-6">
+  <ul class="list-group" id="messages">
+    {% for message in messages %}
+      <div class="w-100">
 
-      {% for message in messages %}
-
-        <li class="list-group-item">
-          <a href="/messages/{{ message.id }}" class="message-link"/>
-
-          <a href="/users/{{ user.id }}">
-            <img src="{{ user.image_url }}" alt="user image" class="timeline-image">
-          </a>
-
-          <div class="message-area">
-            <a href="/users/{{ user.id }}">@{{ user.username }}</a>
-            <span class="text-muted">{{ message.timestamp.strftime('%d %B %Y') }}</span>
-            <p>{{ message.text }}</p>
-          </div>
-        </li>
-        <form action="/{{ message.id }}/like" class="form-inline" method="post">
-          <button class="btn btn-primary my-1" type="submit">Like</button> 
+      <li class="list-group-item">
+        <a href="/messages/{{ message.id }}" class="message-link"></a>
+        
+        <a href="/users/{{ user.id }}">
+          <img
+          src="{{ user.image_url }}"
+          alt="user image"
+          class="timeline-image"
+          />
+        </a>
+        
+        <div class="message-area">
+          <a href="/users/{{ user.id }}">@{{ user.username }}</a>
+          <span class="text-muted">{{
+            message.timestamp.strftime('%d %B %Y')
+          }}</span>
+          <p>{{ message.text }}
+          </p>
+        </div>
+      </li>
+      <!-- LOGIC for testing if liked or unliked -->
+      {% if message.id in liked_messages %}
+        <form action="/{{ message.id }}/remove_like" class="form-inline" method="post">
+          <button class="btn my-1" type="submit">
+            <i class="fas fa-star"></i>
+          </button>
         </form>
+      {% else %}
+        <form action="/{{ message.id }}/add_like" class="form-inline" method="post">
+          <button class="btn my-1" type="submit">
+            <i class="far fa-star"></i>
+          </button>
+        </form>
+      {% endif %}
+      </div>
 
+      <!-- SOLID STAR: <i class="fas fa-star"></i> -->
+      
+    
       {% endfor %}
-
     </ul>
-  </div>
+</div>
 {% endblock %}

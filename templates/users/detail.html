@@ -31,7 +31,7 @@
             <p class="small">Likes</p>
             <h4>
               <!-- link goes to page that displays all posts the user likes -->
-              <a href="/users/{{ user.id }}/likes">{{ user.likes | length }}</a>
+              <a href="/users/{{ user.id }}/likes">{{ g.user.likes | length }}</a>
             </h4>
           </li>
           <div class="ml-auto">

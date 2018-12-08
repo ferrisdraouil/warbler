@@ -33,7 +33,7 @@ class UserModelTestCase(TestCase):
     def setUp(self):
         """Create test client, add sample data."""
 
-        # u = User(
+        # self.u = User(
         #     email="test@test.com",
         #     username="testuser",
         #     password="HASHED_PASSWORD")
